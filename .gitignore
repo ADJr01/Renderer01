@@ -8,6 +8,7 @@
 *.log
 
 # Visual Studio folders
+.idea/
 .vs/
 Debug/
 Release/
