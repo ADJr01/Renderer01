@@ -1,15 +1,27 @@
 #include<iostream>
 #include<SDL.h>
-SDL_Window* window = NULL;
-SDL_Renderer* renderer = NULL;
-bool SDL_INIT_FLAG = false;
+SDL_Window* window = nullptr;
+SDL_Renderer* renderer = nullptr;
+SDL_Texture* color_buffer_texture = nullptr;
+//?Flags
+bool SDL_INIT_FLAG = false; // Runtime Flag
+uint32_t* Color_Buffer = nullptr;
+
 // function declarations
 bool init_sdl();
 void setup();
 void process_input();
 void update();
+void clear_color_buffer(uint32_t color_hex);
 void render();
+void render_color_buffer();
 void cleanup();
+int gameLoop();
+void destroy_window();
+
+//screen config
+const uint16_t WIDTH = 800;
+const uint16_t HEIGHT = 600;
 
 int main(int argc,char* args[]) {
 	SDL_INIT_FLAG = init_sdl();
@@ -20,14 +32,10 @@ int main(int argc,char* args[]) {
 	}
 	std::cout<<"Initialized SDL"<<std::endl;
 	setup();
-	while (SDL_INIT_FLAG){
-		process_input();
-		//if (!SDL_INIT_FLAG)return 0;
-		update();
-		render();
-	}
-	return 0;
+	
+	return gameLoop();
 }
+
 
 bool init_sdl() {
 	if (SDL_Init(SDL_INIT_EVERYTHING)!=0){
@@ -39,8 +47,8 @@ bool init_sdl() {
 		NULL,
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
-		1080,
-		768,
+		WIDTH,
+		HEIGHT,
 		SDL_WINDOW_BORDERLESS
 		);
 	if (!window)
@@ -56,14 +64,52 @@ bool init_sdl() {
 		);
 	if (!renderer)
 	{
+		SDL_DestroyWindow(window);
 		std::cerr<<"Failed To Create Renderer"<<std::endl;
 		return false;
 	}
 	return true;
 }
-void setup(){}
-void process_input()
-{
+void setup(){
+	const size_t n = WIDTH * HEIGHT;
+	Color_Buffer = new(std::nothrow) uint32_t[n];
+	if (!Color_Buffer ){
+		std::cerr<<"Failed To Setup Color Buffer"<<std::endl;
+		throw std::runtime_error("Failed To Setup Color Buffer");
+	}
+	color_buffer_texture = SDL_CreateTexture(
+		renderer,
+		SDL_PIXELFORMAT_ARGB8888,
+		SDL_TEXTUREACCESS_STREAMING,
+		WIDTH,
+		HEIGHT
+		);
+	if (color_buffer_texture==nullptr ){
+		std::cerr<<"Failed To Setup Color Buffer Texture"<<std::endl;
+		throw std::runtime_error("Failed To Setup Color Buffer Texture");
+	}
+	std::cout<<"Setup Complete"<<std::endl;
+
+	return;
+}
+int gameLoop(){
+	try
+	{
+		while (SDL_INIT_FLAG){
+			process_input();
+			update();
+			render();
+		}
+		destroy_window();
+		return 0;
+	}catch (...)
+	{
+		std::cerr<<"Runtime Error"<<std::endl;
+		destroy_window();
+		return 1;
+	}
+}
+void process_input(){
 	SDL_Event event;
 	SDL_PollEvent(&event);
 	if (event.type == SDL_QUIT){
@@ -76,10 +122,36 @@ void process_input()
 	}
 }
 void update(){
-
+	//TODO:
+}
+void clear_color_buffer(uint32_t color_hex){
+	for (int y = 0; y < HEIGHT; y++){
+		for (int x = 0; x < WIDTH; x++){
+			Color_Buffer[(WIDTH*y)+x] = color_hex;
+		}
+	}
+}
+void render_color_buffer(){
+	SDL_UpdateTexture(
+		color_buffer_texture,
+		NULL,
+		Color_Buffer,
+		(sizeof(uint32_t) * WIDTH)
+		);
+	SDL_RenderCopy(renderer,color_buffer_texture,NULL,NULL);
 }
 void render(){
 	SDL_SetRenderDrawColor(renderer,105,195,125,190);
 	SDL_RenderClear(renderer);
+	render_color_buffer();
+	clear_color_buffer(0xFF00EE09);
 	SDL_RenderPresent(renderer);
+}
+void destroy_window()
+{
+	delete[] Color_Buffer;
+	Color_Buffer = nullptr;
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
 }
