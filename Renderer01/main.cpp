@@ -12,7 +12,7 @@ bool init_sdl();
 void setup();
 void process_input();
 void update();
-void clear_color_buffer(uint32_t color_hex);
+void clear_color_buffer();
 void render();
 void render_color_buffer();
 void cleanup();
@@ -22,6 +22,12 @@ void destroy_window();
 //screen config
 const uint16_t WIDTH = 800;
 const uint16_t HEIGHT = 600;
+
+//static colors 0xFF00EE09
+static uint32_t RED = 0xFFFF0000;
+static uint32_t GREEN = 0xFF00FF00;
+static uint32_t BLUE = 0xFF0000FF;
+
 
 int main(int argc,char* args[]) {
 	SDL_INIT_FLAG = init_sdl();
@@ -124,10 +130,13 @@ void process_input(){
 void update(){
 	//TODO:
 }
-void clear_color_buffer(uint32_t color_hex){
+void clear_color_buffer(){
+	auto set_color_buffer = [](size_t index,uint32_t color_hex)->void{
+		Color_Buffer[index] = color_hex;
+	};
 	for (int y = 0; y < HEIGHT; y++){
 		for (int x = 0; x < WIDTH; x++){
-			Color_Buffer[(WIDTH*y)+x] = color_hex;
+			set_color_buffer((WIDTH*y)+x,GREEN);
 		}
 	}
 }
@@ -144,7 +153,7 @@ void render(){
 	SDL_SetRenderDrawColor(renderer,105,195,125,190);
 	SDL_RenderClear(renderer);
 	render_color_buffer();
-	clear_color_buffer(0xFF00EE09);
+	clear_color_buffer();
 	SDL_RenderPresent(renderer);
 }
 void destroy_window()
