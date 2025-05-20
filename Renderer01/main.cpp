@@ -139,14 +139,20 @@ void clear_color_buffer(){
 	};
 	for (int y = 0; y < HEIGHT; y++){ //each row
 		for (int x = 0; x < WIDTH; x++){ //each column
+			if (y%50==0)
+			{
+				set_color_buffer((WIDTH*y)+x,BLACK);
+				continue;
+			}
 			if (x%gap>=0 && x%gap<50)
 			{
 				set_color_buffer((WIDTH*y)+x,WHITE);
 			}else if (x%gap>=50 && x%gap<100){
-				set_color_buffer((WIDTH*y)+x,BLACK);
+				set_color_buffer((WIDTH*y)+x,GREEN);
 			}else{
 				set_color_buffer((WIDTH*y)+x,BLUE);
 			}
+		
 		}
 	}
 }
