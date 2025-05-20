@@ -27,6 +27,8 @@ const uint16_t HEIGHT = 600;
 static uint32_t RED = 0xFFFF0000;
 static uint32_t GREEN = 0xFF00FF00;
 static uint32_t BLUE = 0xFF0000FF;
+static uint32_t WHITE = 0xFFFFFFFF;
+static uint32_t BLACK = 0xFF000000;
 
 
 int main(int argc,char* args[]) {
@@ -131,12 +133,20 @@ void update(){
 	//TODO:
 }
 void clear_color_buffer(){
+	const uint16_t gap = 150;
 	auto set_color_buffer = [](size_t index,uint32_t color_hex)->void{
 		Color_Buffer[index] = color_hex;
 	};
-	for (int y = 0; y < HEIGHT; y++){
-		for (int x = 0; x < WIDTH; x++){
-			set_color_buffer((WIDTH*y)+x,GREEN);
+	for (int y = 0; y < HEIGHT; y++){ //each row
+		for (int x = 0; x < WIDTH; x++){ //each column
+			if (x%gap>=0 && x%gap<50)
+			{
+				set_color_buffer((WIDTH*y)+x,WHITE);
+			}else if (x%gap>=50 && x%gap<100){
+				set_color_buffer((WIDTH*y)+x,BLACK);
+			}else{
+				set_color_buffer((WIDTH*y)+x,BLUE);
+			}
 		}
 	}
 }
@@ -145,7 +155,7 @@ void render_color_buffer(){
 		color_buffer_texture,
 		NULL,
 		Color_Buffer,
-		(sizeof(uint32_t) * WIDTH)
+		static_cast<int>(sizeof(uint32_t) * WIDTH)
 		);
 	SDL_RenderCopy(renderer,color_buffer_texture,NULL,NULL);
 }
