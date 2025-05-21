@@ -20,8 +20,8 @@ int gameLoop();
 void destroy_window();
 
 //screen config
-const uint16_t WIDTH = 800;
-const uint16_t HEIGHT = 600;
+uint64_t WIDTH = 800;
+uint64_t HEIGHT = 600;
 
 //static colors 0xFF00EE09
 static uint32_t RED = 0xFFFF0000;
@@ -50,13 +50,18 @@ bool init_sdl() {
 		std::cerr<<"Failed To Initialize SDL"<<std::endl;
 		return false;
 	}
+	//query window width and height
+	SDL_DisplayMode display_mode;
+	SDL_GetCurrentDisplayMode(0,&display_mode);
+	WIDTH = display_mode.w;
+	HEIGHT = display_mode.h;
 	//creating sdl window
 	window = SDL_CreateWindow(
 		NULL,
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
-		WIDTH,
-		HEIGHT,
+		static_cast<int>(WIDTH),
+		static_cast<int>(HEIGHT),
 		SDL_WINDOW_BORDERLESS
 		);
 	if (!window)
@@ -76,6 +81,7 @@ bool init_sdl() {
 		std::cerr<<"Failed To Create Renderer"<<std::endl;
 		return false;
 	}
+	SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
 	return true;
 }
 void setup(){
@@ -139,18 +145,18 @@ void clear_color_buffer(){
 	};
 	for (int y = 0; y < HEIGHT; y++){ //each row
 		for (int x = 0; x < WIDTH; x++){ //each column
-			if (y%50==0)
+			if (y%50>=0 && y%50<10)
 			{
-				set_color_buffer((WIDTH*y)+x,BLACK);
+				set_color_buffer((WIDTH*y)+x,BLUE);
 				continue;
 			}
 			if (x%gap>=0 && x%gap<50)
 			{
-				set_color_buffer((WIDTH*y)+x,WHITE);
+				set_color_buffer((WIDTH*y)+x,BLACK);
 			}else if (x%gap>=50 && x%gap<100){
-				set_color_buffer((WIDTH*y)+x,GREEN);
+				set_color_buffer((WIDTH*y)+x,RED);
 			}else{
-				set_color_buffer((WIDTH*y)+x,BLUE);
+				set_color_buffer((WIDTH*y)+x,WHITE);
 			}
 		
 		}
@@ -166,7 +172,7 @@ void render_color_buffer(){
 	SDL_RenderCopy(renderer,color_buffer_texture,NULL,NULL);
 }
 void render(){
-	SDL_SetRenderDrawColor(renderer,105,195,125,190);
+	SDL_SetRenderDrawColor(renderer,255,255,255,255);
 	SDL_RenderClear(renderer);
 	render_color_buffer();
 	clear_color_buffer();
