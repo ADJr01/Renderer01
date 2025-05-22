@@ -115,18 +115,10 @@ bool draw_triangle(int max_dots){
         for (int cell = 0;cell<max_dots;cell++)
         {
             const auto cel_to_paint = (WIDTH*row) + cell;
-            if (cell < (max_dots-total_dots_painted) || cell > total_dots_painted)
-            {
-                //paint default
-                Color_Buffer[cel_to_paint]=0xFF333333;
-            }else
+            if (!(cell < (max_dots-total_dots_painted) || cell > total_dots_painted))
             {
                 Color_Buffer[cel_to_paint]=0xFFFFFFFF;
             }
-            // Color_Buffer[cel_to_paint]=0xFFFFFFFF;
-            //Color_Buffer[cel_to_paint]=0xFF333333;
-            
-            
         }
         total_dots_painted--;
     }
